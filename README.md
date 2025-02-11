@@ -47,3 +47,55 @@ node下载:[官网](https://nodejs.org/en/download)
 
 ```
 
+# 二、技术栈
+vue3全家桶、而且是和ui框架无关的。我们只安装一下常用的。
+Vue 3、Vite、TypeScript、Pinia、Vue Router、axios、sass、VueUse
+
+**安装**
+```bash
+pnpm add pinia 
+pnpm add vue-router@4
+pnpm add axios
+pnpm add @vueuse/core
+pnpm add sass -D
+
+
+```
+上述依赖安装完成之后 package.json 如下
+```json
+{
+  "name": "basics",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@vueuse/core": "^12.5.0",
+    "axios": "^1.7.9",
+    "pinia": "^2.3.1",
+    "vue": "^3.5.13",
+    "vue-router": "4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "@vue/tsconfig": "^0.7.0",
+    "sass": "^1.84.0", // 增加了一个sass依赖
+    "typescript": "~5.7.2",
+    "vite": "^6.1.0",
+    "vue-tsc": "^2.2.0"
+  }
+}
+
+```
+
+目录结构设计及命名比如:
+1. components 代表全局公共组件目录
+2. views 代表页面目录
+3. store 代表状态管理目录
+4. hooks 代表自定义 hook
+5. utils 代表工具方法目录
+6. types 代表 ts 类型定义目录
