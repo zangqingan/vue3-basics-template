@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import HelloWorld from './components/HelloWorld.vue'
+import { useUserStore } from './store/modules/user';
+const userStore = useUserStore();
+const { increment } = userStore;
 </script>
 
 <template>
   <div>
+    <div>pinia: {{ userStore.count }}</div>
+     <button type="button" @click="increment">change pinia</button>
     <a href="https://vite.dev" target="_blank">
       <img src="/vite.svg" class="logo" alt="Vite logo" />
     </a>

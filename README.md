@@ -99,3 +99,54 @@ pnpm add sass -D
 4. hooks 代表自定义 hook
 5. utils 代表工具方法目录
 6. types 代表 ts 类型定义目录
+
+
+# 三、Pinia 和 Vue Router 配置 
+
+## 3.1 Pinia 配置
+Pinia 是 Vue 的专属状态管理库，它允许你跨组件或页面共享状态。官网: [Pinia](https://pinia.vuejs.org/zh/)、
+持久化，顾名思义，保持数据持久不消失。要实现 pinia 数据持久化，我们需要借助 pinia-plugin-persistedstate 插件
+**安装**
+```bash
+pnpm add pinia-plugin-persistedstate
+```
+**使用**
+创建 src/store 目录，表示这个目录下的内容都是与存储相关。在目录下新建 init.ts 文件和 modules 文件夹。
+1. init.ts 作为基础文件，用于注册 Pinia 和 Pinia 的基本配置
+2. modules 文件夹下存放的是 Store 文件，比如 user.ts 、locale.ts 等存储文件
+
+```js
+// init.ts
+// 配置 Pinia 及持久化
+import { createPinia } from 'pinia'
+// 引入持久化插件
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
+// 引入Vue应用实例ts类型
+import type { App } from 'vue'
+
+// 创建一个 pinia 实例 (根 store) 并将其传递给应用
+const pinia = createPinia()
+
+// 配置持久化-使用默认配置
+pinia.use(piniaPluginPersistedstate)
+/**
+ * 创建一个函数用于初始化 pinia
+ */
+const initStore  = (app: App<Element>) => {
+    return app.use(pinia)
+}
+
+// 导出
+export {
+    pinia,
+    initStore
+}
+
+// main.ts 中运行
+
+```
+
+
+
+
+
