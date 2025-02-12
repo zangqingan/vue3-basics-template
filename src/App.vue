@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import HelloWorld from './components/HelloWorld.vue'
-import { useUserStore } from './store/modules/user';
+import { useUserStore } from './store';
 const userStore = useUserStore();
 const { increment } = userStore;
 </script>
