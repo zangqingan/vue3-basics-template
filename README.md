@@ -156,4 +156,123 @@ Vue Router 是 Vue.js 的官方路由。它与 Vue.js 核心深度集成，让�
 2. index.ts 用于对 modules 下的路由做处理，比如自动导出
 3. modules 文件夹下存放的是全部路由配置文件，这里是把路由配置都单独建立一个文件
 
+```js
+// init.ts
+import { createRouter, createWebHashHistory  } from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router'
+import type { App } from 'vue'
+import { routes } from './index' // 路由配置项
 
+// 导出路由实例对象
+const router = createRouter({
+    history: createWebHashHistory(),
+    routes: routes as RouteRecordRaw[],
+    strict: true,
+    scrollBehavior: () => ({ left: 0, top: 0 }),
+})
+
+/**
+ * 初始化路由函数
+ */
+const initRouter = (app: App<Element>) => {
+    app.use(router)
+}
+// 导出
+export {
+    router,
+    initRouter
+}
+
+// index.ts
+// import type { RouteRecordRaw } from 'vue-router';
+
+const routes: RouteRecordRaw[] = [];
+
+// 获取 modules 目录下所有的路由配置项
+/** 基础路由 */
+const basicRoutes: Record<string, any> = import.meta.glob(['./modules/basics/**/*.ts'], {
+  eager: true,
+});
+console.log("basicRoutes",basicRoutes);
+
+// 遍历路由配置项，将路由添加到 routes 数组中
+for (const key in basicRoutes) {
+  const route = basicRoutes[key].default;
+  routes.push(route);
+}
+// Object.keys(basicRoutes).forEach((key) => {
+//   routes.push(basicRoutes[key].default);
+// });
+// 导出
+export { routes };
+
+// modules/basics/home.ts
+import type { RouteRecordRaw } from 'vue-router';
+
+const Home: RouteRecordRaw = {
+  path: '/',
+  redirect: '/home',
+  children: [
+    {
+      path: '/home',
+      name: 'Home',
+      component: () => import('../../../views/home/index.vue'),
+    },
+  ],
+};
+
+export default Home;
+
+// views/home/index.vue
+<script setup lang="ts">
+import { useUserStore } from '../../store';
+const userStore = useUserStore();
+const { increment } = userStore;
+</script>
+
+<template>
+   <div>
+      <div>Home</div>
+      <div>pinia: {{ userStore.count }}</div>
+      <button type="button" @click="increment">change pinia</button>
+  </div>
+</template>
+
+<style  lang="scss"  scoped>
+
+</style>
+
+// App.vue配置出口
+<script setup lang="ts">
+
+</script>
+
+<template>
+  <RouterView />
+</template>
+
+<style scoped>
+
+</style>
+
+// main.ts 配置初始化
+import './style.css'
+import { createApp } from 'vue'
+import { initStore } from './store/init'
+import { initRouter } from './router/init'
+import App from './App.vue'
+
+/**
+ * 定义一个函数用来启动Vue
+ */
+async function bootstrap() {
+    const app = createApp(App)
+    initStore(app)
+    initRouter(app)
+    app.mount('#app')
+    
+}
+bootstrap() 
+
+
+```
