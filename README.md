@@ -146,7 +146,14 @@ export {
 
 ```
 
+## 3.2 Vue Router 配置 
+Vue Router 是 Vue.js 的官方路由。它与 Vue.js 核心深度集成，让用 Vue.js 构建单页应用 (SPA) 变得轻而易举。
 
-
+**使用**
+创建一个 src/router 目录，表示这个目录下的内容都是与路由相关。
+新建 init.ts 文件、index.ts 文件 和 modules 文件夹
+1. init.ts 用于 Router 的注册和基本配置
+2. index.ts 用于对 modules 下的路由做处理，比如自动导出
+3. modules 文件夹下存放的是全部路由配置文件，这里是把路由配置都单独建立一个文件
 
 
