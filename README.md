@@ -442,3 +442,100 @@ pnpm add rollup-plugin-visualizer -D
 ```js
 
 ```
+
+## 4.3 环境变量
+环境变量。顾名思义，在不同环境下呈现不同的变量值。Vite 在特殊的 import.meta.env 对象下暴露了一些常量。这些常量在开发阶段被定义为全局变量，并在构建阶段被静态替换，以使树摇（tree-shaking）更有效。
+注意: 由于任何暴露给 Vite 源码的变量最终都将出现在客户端包中，VITE_* 变量应该不包含任何敏感信息。
+
+**内置变量**、vite已经命名好的在所有情况下都可用。
+1. import.meta.env.MODE: {string} 应用运行的模式、development 表示开发模式，生产环境是 production。
+2. import.meta.env.BASE_URL: {string} 部署应用时的基本 URL、默认为 /。他由 base 配置项决定。
+3. import.meta.env.PROD: {boolean} 应用是否运行在生产环境（使用 NODE_ENV='production' 运行开发服务器或构建应用时使用 NODE_ENV='production' ）、在生产环境，这个值是 true。
+4. import.meta.env.DEV: {boolean} 应用是否运行在开发环境 (永远与 import.meta.env.PROD相反)、在生产环境，这个值为 false。
+5. import.meta.env.SSR: {boolean} 应用是否运行在 server 上、如果使用 SSR，服务器端运行时这个值是 true。
+
+**自定义变量**、在配置文件中 Vite 自动将环境变量暴露在 import.meta.env 对象下，作为字符串。同时为了防止意外地将一些环境变量泄漏到客户端，只有以 VITE_ 为前缀的变量才会暴露给经过 vite 处理的代码。如果想要自定义环境变量的前缀，在 vite.config.ts 中设置 envPrefix 选项。
+```js
+// 配置文件 .env
+VITE_SOME_KEY=123
+DB_PASSWORD=foobar
+
+console.log(import.meta.env.VITE_SOME_KEY) // "123"
+console.log(import.meta.env.DB_PASSWORD) // undefined
+// 只有 VITE_SOME_KEY 会被暴露为 import.meta.env.VITE_SOME_KEY 提供给客户端源码，而 DB_PASSWORD 则不会。
+```
+
+想要自定义环境变量，首先先创建几个环境变量存放的文件，一般是放在根目录下。Vite 是通过使用 dotenv 从你的 环境目录 中加载这些配置文件。
+| Syntax      | Description |
+| ----------- | ----------- |
+|.env                |# 所有情况下都会加载|
+|.env.local          |# 所有情况下都会加载，但会被 git 忽略, 添加到 .gitignore 中|
+|.env.[mode]         |# 只在指定模式下加载|
+|.env.[mode].local   |# 只在指定模式下加载，但会被 git 忽略, 添加到 .gitignore 中|
+
+1. .env 文件，表示通用的环境变量，优先级较低，会被其他环境文件覆盖
+2. .env.development 文件，表示开发环境下的环境变量
+3. .env.staging 预发布环境 一般与生产环境无异，只是 url 变化
+4. .env.testing 测试环境
+5. .env.production 文件，表示生产环境下的环境变量
+
+在默认情况下，运行的脚本 dev 命令(pnpm dev)是会加载 .env.developmen 中的环境变量 而脚本 build 命令是加载 .env.production 中的环境变量。想在 vite build 时运行不同的模式来渲染不同的标题，你可以通过传递 --mode 选项标志来覆盖命令使用的默认模式。
+
+```json
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",// 默认就是生产构建-等价于 --mode production
+    "build:prod": "vue-tsc -b && vite build --mode production",
+    "build:dev": "vue-tsc -b && vite build --mode development",
+    "build:staging": "vue-tsc -b && vite build --mode staging",
+    "preview": "vite preview"
+  },
+```
+
+TS 智能提示: 默认情况下，Vite 在 vite/client.d.ts 中为 import.meta.env 提供了类型定义。随着在 .env[mode] 文件中自定义了越来越多的环境变量，你可能想要在代码中获取这些以 VITE_ 为前缀的用户自定义环境变量的 TypeScript 智能提示。在使用 pnpm create vite 创建项目时在scr下自动创建了一个 vite-env.d.ts 文件。
+
+编辑器内折叠文件、在根目录下新建一个 .vscode 文件夹，在此文件夹中新增 settings.json 文件，写入以下配置：
+```json
+{
+  "explorer.fileNesting.enabled": true, // 是否开启文件嵌套，默认 false
+  "explorer.fileNesting.expand": false, // 是否默认展开
+  "explorer.fileNesting.patterns": { // 文件嵌套规则
+    "*.env": ".env.*"
+  }
+}
+
+```
+
+最后是如何使用、在 vite.config.ts 中使用环境变量如下:
+
+```js
+import { defineConfig, loadEnv } from 'vite'
+import vue from "@vitejs/plugin-vue";
+
+export default defineConfig(({ mode }) => {
+  // 根据当前工作目录中的 `mode` 加载 .env 文件
+  // 设置第三个参数为 '' 来加载所有环境变量，而不管是否有
+  // `VITE_` 前缀。
+  const env = loadEnv(mode, process.cwd(), '')
+  return {
+    plugins: [vue()],
+    // vite 配置
+    define: {
+      __APP_ENV__: JSON.stringify(env.APP_ENV),
+    },
+  }
+})
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
