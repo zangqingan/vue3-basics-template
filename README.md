@@ -331,3 +331,114 @@ export default defineConfig({
 }
 
 ```
+
+## 4.2 vite插件
+若要使用一个插件，需要将它添加到项目的 devDependencies 并在 vite.config.js 配置文件中的 plugins 数组中引入它。具体可查看官网[Vite插件](https://cn.vitejs.dev/plugins/)。常用的如下:
+
+1. 配置gzip 压缩打包、安装 vite-plugin-compression 包。[官网](https://github.com/vbenjs/vite-plugin-compression)
+
+**安装**
+```bash
+pnpm add vite-plugin-compression --save-dev
+pnpm add vite-plugin-compression -D
+devDependencies:
++ vite-plugin-compression 0.5.1
+
+```
+
+**配置**注意: 想使用 gzip 压缩来优化项目，还需要在 nginx 中开启 gzip 并进行相关配置，这一步交给后端来处理。
+```js
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import viteCompression from "vite-plugin-compression" // 配置gzip压缩
+import { resolve } from "path" // 配置路径别名
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [
+    vue(),
+    //默认压缩gzip，生成 .gz文件
+    viteCompression({
+      deleteOriginFile: false, //压缩后是否删除源文件
+    }),
+  ],
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src'),
+    }
+  }
+})
+
+```
+
+2. 打包分析可视化、安装 rollup-plugin-visualizer 包。[官网](https://github.com/btd/rollup-plugin-visualizer)
+   
+**安装**
+```bash
+pnpm add rollup-plugin-visualizer -D
+devDependencies:
++ rollup-plugin-visualizer 5.14.0
+
+```
+
+
+**配置**注意: 使用命令 pnpm build 构建后，分析图 html 文件会在根目录下生成，默认命名为 stats.html可以自己修改。一般也会把分析文件加入 .gitignore ，不提交到 git 仓库中。
+```js
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import viteCompression from "vite-plugin-compression" // 配置gzip压缩
+import { visualizer } from "rollup-plugin-visualizer" // 配置打包分析可视化
+import { resolve } from "path" // 配置路径别名
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [
+    vue(),
+    //默认压缩gzip，生成 .gz文件
+    viteCompression({
+      deleteOriginFile: false, //压缩后是否删除源文件
+    }),
+    // put it the last one
+    visualizer({
+      open: true, //build后，是否自动打开分析页面，默认false
+      gzipSize: true, //是否分析gzip大小
+      brotliSize: true, //是否分析brotli大小
+      //filename: 'stats.html'//默认分析文件命名
+    }),
+  ],
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src'),
+    }
+  }
+})
+
+```
+
+3. 打包分析可视化、安装 rollup-plugin-visualizer 包。[官网](https://github.com/vbenjs/vite-plugin-compression)
+   
+**安装**
+```bash
+pnpm add rollup-plugin-visualizer -D
+
+```
+
+
+**配置**
+```js
+
+```
+
+4. 打包分析可视化、安装 rollup-plugin-visualizer 包。[官网](https://github.com/vbenjs/vite-plugin-compression)
+   
+**安装**
+```bash
+pnpm add rollup-plugin-visualizer -D
+
+```
+
+
+**配置**
+```js
+
+```
