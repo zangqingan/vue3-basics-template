@@ -1,7 +1,7 @@
-import './style.css'
+import '@/assets/styles/index.scss'
 import { createApp } from 'vue'
-import { initStore } from './store/init'
-import { initRouter } from './router/init'
+import { initStore } from '@/store/init'
+import { initRouter } from '@/router/init'
 import App from './App.vue'
 
 /**

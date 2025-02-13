@@ -527,6 +527,104 @@ export default defineConfig(({ mode }) => {
 })
 ```
 
+## 4.4 css配置
+Vite 提供了一个 css.preprocessorOptions 选项，用来指定传递给 CSS 预处理器选项：css-preprocessoroptions
+```js
+import { defineConfig, loadEnv } from 'vite'
+import type { ConfigEnv, UserConfig } from 'vite';
+import vue from '@vitejs/plugin-vue'
+import viteCompression from "vite-plugin-compression" // 配置gzip压缩
+import { visualizer } from "rollup-plugin-visualizer" // 配置打包分析可视化
+import { resolve } from "path" // 配置路径别名
+
+// https://vite.dev/config/
+export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
+  // 获取环境变量
+  const env = loadEnv(mode, process.cwd(), '')
+  console.log(env);
+  
+  return {
+    plugins: [
+      vue(),
+      //默认压缩gzip，生成 .gz文件
+      viteCompression({
+        deleteOriginFile: false, //压缩后是否删除源文件
+      }),
+      // put it the last one
+      visualizer({
+        open: true, //build后，是否自动打开分析页面，默认false
+        gzipSize: true, //是否分析gzip大小
+        brotliSize: true, //是否分析brotli大小
+        //filename: 'stats.html'//默认分析文件命名
+      }),
+    ],
+    resolve: {
+      alias: {
+        '@': resolve(__dirname, 'src'),
+      }
+    },
+    // css配置
+    css: {
+      preprocessorOptions: {
+        scss: {
+          api: 'modern-compiler',
+          additionalData: `@import  "@/styles/_variable.scss" as *;`,
+        }
+      }
+    },
+  }
+})
+
+```
+
+## 4.5 打包配置
+生产环境去除 console.log、debugger(esbuild 模式)
+```js
+//vite.config.ts
+import type { UserConfig, ConfigEnv } from "vite";
+import vue from "@vitejs/plugin-vue";
+
+export default ({ mode }: ConfigEnv): UserConfig => {
+  return {
+    plugins: [vue()],
+
+    esbuild: {
+      drop: ["debugger"],
+      pure: ["console.log"],
+    },
+  };
+};
+
+```
+
+## 4.6 分包策略
+分包策略，就是根据不同的规则和逻辑来分割成大大小小的包，把一些固定，常规不更新的文件，进行分割切包处理、分包是一种优化程序加载速度，性能的策略和操作。
+分包策略的作用在于：
+
+1. 减少代码体积和加载时间: 当你的项目包含多个模块或者依赖项时，将它们分割成多个包可以减少单个包的体积。并且只重新加载修改的文件，减少加载时间
+2. 提高缓存利用率:处理部分包而不是全部，分包可以提高浏览器的缓存命中率，从而减少不必要的网络请求，加快页面加载速度
+3. 优化资源结构: 对于大型项目或者复杂的应用程序，通过合理划分功能模块和依赖项，有利于管理项目的整理结构和维护
+
+**分包策略根据项目不同，会呈现出不同的策略**、常见如下:
+1. 按功能或模块分包
+2. 按页面或路由分包
+3. 按第三方依赖分包
+4. 公共代码分包
+5. 按环境分包
+
+**实现**、它是在 build.rollupOptions  构建选项中自定义底层的 Rollup 打包配置。
+```js
+
+```
+
+
+
+
+
+
+
+
+
 
 
 
