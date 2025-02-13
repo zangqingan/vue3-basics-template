@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useUserStore } from '../../store';
+import { useUserStore } from '@/store';
 const userStore = useUserStore();
 const { increment } = userStore;
 </script>

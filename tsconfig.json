@@ -3,5 +3,11 @@
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
-  ]
+  ],
+  "compilerOptions": {
+    "baseUrl": ".", //使用相对路径，当前根目录
+    "paths": {
+      "@/*": ["src/*"],
+    }
+  }
 }

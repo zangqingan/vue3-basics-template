@@ -276,3 +276,58 @@ bootstrap()
 
 
 ```
+
+
+# 四、Vite 配置
+ite 是一种新型前端构建工具，能够显著提升前端开发体验，它主要由两部分组成：
+
+1. 一个开发服务器，它基于 原生 ES 模块 提供了 丰富的内建功能，如速度快到惊人的 模块热替换（HMR）。
+2. 一套构建指令，它使用 Rollup 打包你的代码，并且它是预配置的，可输出用于生产环境的高度优化过的静态资源。
+
+在 Vite 中，你可以使用 Vue 、 React 、 Svelte 、 Preact 、 Lit 、 Solid 、 Alpine 、 Hyperapp 、 Stimulus 、 Mithril 、 Vue 3 等框架。
+
+## 4.1 配置别名
+首先安装为 Node.js 提供类型定义的包，也是解决 "找不到模块 path 或其相对应的类型声明" 问题。对于js项目则不需要。
+
+**安装**
+```bash
+pnpm add @types/node -D
+pnpm add @types/node --save-dev
+devDependencies:
++ @types/node 22.13.1
+
+```
+
+在 vite.config.ts 中配置 resolve.alias ，使用 @ 符号代表 src。如果是ts项目还需要在tsconfig.json 中配置。
+```js
+//  vite.config.ts
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import { resolve } from "path" // 配置路径别名
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [vue()],
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src'),
+    }
+  }
+})
+
+// tsconfig.json
+{
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ],
+  "compilerOptions": {
+    "baseUrl": ".", //使用相对路径，当前根目录
+    "paths": {
+      "@/*": ["src/*"],
+    }
+  }
+}
+
+```
