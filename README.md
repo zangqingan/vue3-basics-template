@@ -466,12 +466,12 @@ console.log(import.meta.env.DB_PASSWORD) // undefined
 ```
 
 想要自定义环境变量，首先先创建几个环境变量存放的文件，一般是放在根目录下。Vite 是通过使用 dotenv 从你的 环境目录 中加载这些配置文件。
-| Syntax      | Description |
-| ----------- | ----------- |
-|.env                |# 所有情况下都会加载|
-|.env.local          |# 所有情况下都会加载，但会被 git 忽略, 添加到 .gitignore 中|
-|.env.[mode]         |# 只在指定模式下加载|
-|.env.[mode].local   |# 只在指定模式下加载，但会被 git 忽略, 添加到 .gitignore 中|
+| Syntax            | Description                                                 |
+| ----------------- | ----------------------------------------------------------- |
+| .env              | # 所有情况下都会加载                                        |
+| .env.local        | # 所有情况下都会加载，但会被 git 忽略, 添加到 .gitignore 中 |
+| .env.[mode]       | # 只在指定模式下加载                                        |
+| .env.[mode].local | # 只在指定模式下加载，但会被 git 忽略, 添加到 .gitignore 中 |
 
 1. .env 文件，表示通用的环境变量，优先级较低，会被其他环境文件覆盖
 2. .env.development 文件，表示开发环境下的环境变量
@@ -628,6 +628,103 @@ export default ({ mode }: ConfigEnv): UserConfig => {
 
 
 
+
+
+
+
+
+
+
+
+
+# 五、代码规范配置
+通过 ESLint + Prettier + Stylelint 实现代码风格规范、格式化，通过 EditorConfig 实现 IDE 编码风格规范化。
+1. 代码层面(ESLint + Prettier + Stylelint)
+2. IDE 层面(EditorConfig)
+
+## 5.1 ESLint
+ESLint 是一个 JavaScript 代码检查工具，帮助我们来确保代码风格一致，这对于团队协作来说是大有益处，也用来发现一些潜在错误或不规范的代码。ESLint 的规则是可配置的，因此可以根据团队偏好、项目需求来定义自己的 ESLint 规则
+在 ESLint v9 之后发生了较大改变:
+1. 对 NodeJS 版本的要求，不再支持 v18.18.0 和 v19 版本
+2. 新的默认配置格式：eslint.config.js 和扁平化配置
+3. 删除了大部分的格式化程序，更专注于代码质量
+**安装 ESLint**
+```bash
+pnpm create @eslint/config@latest
+How would you like to use ESLint?（您希望如何使用 ESLint）
+
+To check syntax only（只检查语法）
+To check syntax and find problems（检查语法并发现问题）√
+
+What type of modules does your project use?（你的项目使用什么类型的模块？）
+
+JavaScript modules (import/export) （JavaScript模块（导入/导出）√
+CommonJS (require/exports) （CommonJS(需要/出口) ）
+None of these （这些都不是）
+
+Which framework does your project use?（您的项目使用哪个框架？）
+
+React
+Vue.js √
+None of these （这些都不是）
+
+Does your project use TypeScript?（你的项目使用TypeScript吗？）
+
+No
+Yes √
+
+Where does your code run?（你的代码在哪里运行？）
+
+Browser (浏览器) √
+Node
+
+Would you like to install them now?（您现在要安装它们吗？）
+
+No
+Yes √
+
+Which package manager do you want to use？（您想使用哪个包管理器）
+
+npm
+yarn
+pnpm √
+bun
+命令行配置选择完成后，会安装一些依赖到 devDependencies。
+devDependencies:
++ @eslint/js 9.20.0  ESLint 的核心包，用于支持 JavaScript 的代码分析功能，适用于基于 JavaScript 的代码检查
++ eslint 9.20.1 ESLint 包
++ eslint-plugin-vue 9.32.0  专为 Vue 项目设计的 ESLint 插件，提供了对 Vue 特有语法（如模板、指令等）的代码检查和规则支持
++ globals 15.15.0 JavaScript 全局变量的库，提供常见的全局变量，通常用于 ESLint 配置中定义哪些全局变量是允许的
++ typescript-eslint 8.24.0 TypeScript 的 ESLint 插件，允许 ESLint 对 TypeScript 代码进行静态分析和代码检查
+
+
+
+
+```
+在项目根目录下，还会生成了一个 eslint.config.js 文件，它是新的默认配置格式。
+
+```js
+import globals from "globals";
+import pluginJs from "@eslint/js";
+import tseslint from "typescript-eslint";
+import pluginVue from "eslint-plugin-vue";
+
+
+/** @type {import('eslint').Linter.Config[]} */
+export default [
+  {files: ["**/*.{js,mjs,cjs,ts,vue}"]},
+  {languageOptions: { globals: globals.browser }},
+  pluginJs.configs.recommended,
+  ...tseslint.configs.recommended,
+  ...pluginVue.configs["flat/essential"],
+  {files: ["**/*.vue"], languageOptions: {parserOptions: {parser: tseslint.parser}}},
+];
+```
+
+在编辑器如 VS Code 中集成 ESLint 插件，可以帮助你找出代码中不符合 ESLint 规则的地方，通过不同颜色下划线该告诉你错误信息、警告信息等，这很有用。ESLint 扩展会自动查找 ESLint 全局安装版本，在项目根目录下找到你的配置文件(eslint.config.js)
+在 ESLint v9 之前，我们通过创建 .eslintignore 来忽略文件，在扁平化配置下，我们需要在 eslint.config.js 中配置 ignores 字段，它是一个字符串数组。
+
+规则是 ESLint 的核心构建块。@eslint/js 包已经配置了大量规则pluginJs.configs.recommended，当然，你也可以在 rules 中覆盖这些规则来完成你的需要。
 
 
 

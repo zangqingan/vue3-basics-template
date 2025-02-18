@@ -9,7 +9,7 @@ import { resolve } from "path" // 配置路径别名
 export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
   // 获取环境变量
   const env = loadEnv(mode, process.cwd(), '')
-  console.log(env);
+  // console.log("env",env);
 
   return {
     plugins: [
@@ -26,6 +26,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
         //filename: 'stats.html'//默认分析文件命名
       }),
     ],
+    // 设置别名
     resolve: {
       alias: {
         '@': resolve(__dirname, 'src'),
@@ -36,7 +37,6 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
       preprocessorOptions: {
         scss: {
           api: 'modern-compiler',
-          additionalData: `@import  "@/styles/_variable.scss" as *;`,
         }
       }
     },
