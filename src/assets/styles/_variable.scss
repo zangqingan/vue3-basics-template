@@ -1,3 +1,4 @@
+@use 'sass:map';
 // colors
 $colors: (
   'primary': #303133,
@@ -11,7 +12,7 @@ $colors: (
   'black': #000,
   'danger': #f56c6c
 );
-$border-color: map-get($colors, 'light');
+$border-color: map.get($colors, 'light');
 // font size
 $base-font-size: 1rem;
 $font-sizes: (
