@@ -727,10 +727,123 @@ export default [
 规则是 ESLint 的核心构建块。@eslint/js 包已经配置了大量规则pluginJs.configs.recommended，当然，你也可以在 rules 中覆盖这些规则来完成你的需要。
 
 
+**使用 plugins 添加插件**
+
+ESLint 插件是一个 npm 模块，可以包含一组 ESLint 规则、配置、处理器和环境。使用plugins属性对象配置。比如，Vue.js 的官方 ESLint 插件 eslint-plugin-vue。在新版的eslint安装中就会自动添加，不过并没有配置成插件，可以利用这个插件实现一个针对 Vue 单文件组件的 ESLInt 配置。
+
+如果没有安装请先安装: `pnpm add eslint-plugin-vue --save-dev
+`
+
+这里还需要 vue-eslint-parser 插件 用于 .vue 文件的 ESLint 自定义解析器。
+```bash
+pnpm add vue-eslint-parser --save-dev
+devDependencies:
++ vue-eslint-parser 9.4.3
+
+```
+然后，在 eslint.config.js 中配置
+```js
+import globals from "globals";
+import pluginJs from "@eslint/js";
+import tseslint from "typescript-eslint";
+import pluginVue from "eslint-plugin-vue";
+import parserVue from 'vue-eslint-parser';
+
+/** @type {import('eslint').Linter.Config[]} */
+export default [
+  ...tseslint.configs.recommended,
+  {files: ["**/*.{js,mjs,cjs,ts,vue}"]},
+  {languageOptions: { globals: globals.browser }},
+  pluginJs.configs.recommended,
+  ...pluginVue.configs["flat/essential"],
+  // .vue文件规则配置
+  {
+    files: ["**/*.vue"], 
+    languageOptions: {
+      parser: parserVue,
+      parserOptions: {
+        parser: tseslint.parser,
+        ecmaFeatures: {
+          jsx: true,
+        },
+        extraFileExtensions: ['.vue'],
+        sourceType: 'module',
+      }
+    },
+    plugins: {
+      vue: pluginVue,
+    },
+    processor: pluginVue.processors['.vue'],
+    rules: {
+      ...pluginVue.configs.base.rules,
+      ...pluginVue.configs['vue3-essential'].rules,
+      ...pluginVue.configs['vue3-strongly-recommended'].rules,
+      ...pluginVue.configs['vue3-recommended'].rules,
+      //...更多配置规则
+    },
+  },
+  // 测试规则配置
+  {
+    files: ["src/main.ts"], //确定配置对象应用于哪些文件
+    ignores: ["node_modules"], //确定应该忽略哪些文件
+    rules: {
+      "no-alert": "error", //禁止使用 alert、confirm 和 prompt
+      "no-empty-function": "error", //禁止空函数
+      "no-var": "error", //禁止使用var
+    },
+  },
+  // 忽略检查文件
+  {
+    ignores: [
+      "**/node_modules",
+      "**/public",
+      "**/assets",
+      "**/dist",
+      "**/package-lock.json",
+      "**/yarn.lock",
+      "**/pnpm-lock.yaml",
+      "**/.history",
+      "**/CHANGELOG*.md",
+      "**/*.min.*",
+      "**/LICENSE*",
+      "**/__snapshots__",
+      "**/auto-import?(s).d.ts",
+      "**/components.d.ts",
+    ],
+  },
+];
+```
+
+最后为了运行方便在实际项目中、我们会将命令写在 package.json 的 scripts。
+```json
+{
+  "scripts": {
+    "lint:eslint": "eslint --fix  --cache --max-warnings 0  \"src/**/*.{vue,ts,tsx}\"  --cache-location \"node_modules/.cache/eslint/\"",
+  }
+}
+
+--max-warnings： 此选项允许您指定警告阈值，如果项目中存在过多的警告级别规则冲突，则该阈值可用于强制 ESLint 退出并显示错误状态
+--fix： 指示 ESLint 尝试修复尽可能多的问题
+--cache： 存储有关已处理文件的信息，以便仅对更改的文件进行操作。确保仅对更改的文件进行 linted 处理，从而显著提高 ESLint 的运行时性能
+--cache-location： 缓存位置的文件或目录的路径，因为缓存会生成一个 .eslintcache 文件，不配置将在根目录下生成，我们这里统一处理放在 node_modules/.cache
+
+在终端检查代码
+pnpm lint:eslint
+
+```
 
 
+**在 Vite 中集成 ESLint 插件**、在 Vite 程序中检查 ESLint 的错误，并将其错误或警告输出在终端和页面上。需要vite-plugin-eslint 插件。
+```bash
+pnpm add vite-plugin-eslint --save-dev
 
+devDependencies:
++ vite-plugin-eslint 1.8.1
 
-
-
+```
+然后在 vite.config.ts 中配置
+```js
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import eslintPlugin from 'vite-plugin-eslint' // 集成eslint插件
 

@@ -8,7 +8,8 @@
     "build": "vue-tsc -b && vite build",
     "build:dev": "vue-tsc -b && vite build --mode development",
     "build:staging": "vue-tsc -b && vite build --mode staging",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint:eslint": "eslint --fix  --cache --max-warnings 0  \"src/**/*.{vue,ts,tsx}\"  --cache-location \"node_modules/.cache/eslint/\""
   },
   "dependencies": {
     "@vueuse/core": "^12.5.0",
@@ -32,6 +33,8 @@
     "typescript-eslint": "^8.24.0",
     "vite": "^6.1.0",
     "vite-plugin-compression": "^0.5.1",
+    "vite-plugin-eslint": "^1.8.1",
+    "vue-eslint-parser": "^9.4.3",
     "vue-tsc": "^2.2.0"
   }
 }

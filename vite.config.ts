@@ -4,12 +4,13 @@ import vue from '@vitejs/plugin-vue'
 import viteCompression from "vite-plugin-compression" // 配置gzip压缩
 import { visualizer } from "rollup-plugin-visualizer" // 配置打包分析可视化
 import { resolve } from "path" // 配置路径别名
+import eslint from "vite-plugin-eslint"; // vite 集成eslint
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
   // 获取环境变量
   const env = loadEnv(mode, process.cwd(), '')
-  // console.log("env",env);
+  console.log("env", env.VITE_APP_TITLE);
 
   return {
     plugins: [
@@ -25,6 +26,8 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
         brotliSize: true, //是否分析brotli大小
         //filename: 'stats.html'//默认分析文件命名
       }),
+      // eslint 配置
+      eslint()
     ],
     // 设置别名
     resolve: {

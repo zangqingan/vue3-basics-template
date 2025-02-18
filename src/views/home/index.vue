@@ -5,10 +5,15 @@ const { increment } = userStore;
 </script>
 
 <template>
-   <div>
-      <div>Home</div>
-      <div>pinia: {{ userStore.count }}</div>
-      <button type="button" @click="increment">change pinia</button>
+  <div>
+    <div>Home</div>
+    <div>pinia: {{ userStore.count }}</div>
+    <button
+      type="button"
+      @click="increment"
+    >
+      change pinia
+    </button>
   </div>
 </template>
 

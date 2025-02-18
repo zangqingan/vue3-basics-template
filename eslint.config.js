@@ -2,7 +2,7 @@ import globals from "globals";
 import pluginJs from "@eslint/js";
 import tseslint from "typescript-eslint";
 import pluginVue from "eslint-plugin-vue";
-
+import parserVue from "vue-eslint-parser";
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
@@ -11,7 +11,32 @@ export default [
   {languageOptions: { globals: globals.browser }},
   pluginJs.configs.recommended,
   ...pluginVue.configs["flat/essential"],
-  {files: ["**/*.vue"], languageOptions: {parserOptions: {parser: tseslint.parser}}},
+  // .vue文件规则配置
+  {
+    files: ["**/*.vue"], 
+    languageOptions: {
+      parser: parserVue,
+      parserOptions: {
+        parser: tseslint.parser,
+        ecmaFeatures: {
+          jsx: true,
+        },
+        extraFileExtensions: ['.vue'],
+        sourceType: 'module',
+      }
+    },
+    plugins: {
+      vue: pluginVue,
+    },
+    processor: pluginVue.processors['.vue'],
+    rules: {
+      ...pluginVue.configs.base.rules,
+      ...pluginVue.configs['vue3-essential'].rules,
+      ...pluginVue.configs['vue3-strongly-recommended'].rules,
+      ...pluginVue.configs['vue3-recommended'].rules,
+      //...更多配置规则
+    },
+  },
   // 测试规则配置
   {
     files: ["src/main.ts"], //确定配置对象应用于哪些文件
