@@ -843,7 +843,112 @@ devDependencies:
 ```
 然后在 vite.config.ts 中配置
 ```js
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
-import eslintPlugin from 'vite-plugin-eslint' // 集成eslint插件
+import { defineConfig } from "vite";
+import vue from "@vitejs/plugin-vue";
+import eslint from "vite-plugin-eslint";
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [vue(), eslint()],
+});
+
+
+```
+
+## 5.2 Prettier
+Prettier 是一个代码格式化工具，主要用于自动化代码的风格统一和格式化，专注于确保代码的可读性和一致性。
+**安装**
+```bash
+pnpm add --save-dev --save-exact prettier
+devDependencies:
++ prettier 3.5.1
+
+```
+
+配置 Prettier
+在根目录下新增两个文件：
+  .prettierignore 忽略文件，表示哪些文件忽略格式化
+  .prettierrc.js Prettier 配置文件(ES Modules)
+
+```js
+// .prettierignore
+sdist
+public/*
+src/assets/*
+
+// .prettierrc.js
+/** @type {import('prettier').Config} */
+const config = {
+  printWidth: 100, // 每行最大字符数
+  tabWidth: 2, // 缩进空格数
+  semi: true, // 尾部添加分号
+  singleQuote: true, // 是否使用单引号而不是双引号
+  bracketSpacing: true, // 在对象字面量的括号内添加空格
+  arrowParens: 'always', // 总是为箭头函数的参数添加圆括号
+  proseWrap: 'preserve', // 不改变 Markdown 文本的换行
+  bracketSameLine: false,
+};
+
+export default config;
+
+
+```
+
+VS Code 中集成 Prettier 在 VS Code 扩展中搜索 Prettier 并进行安装、Prettier 扩展会自动查找项目根目录下的配置文件、忽略文件。同时将保存时格式化代码、且指定 Prettier 插件来格式化代码写进 settings.json 中
+
+
+**Prettier 脚本命令配置**
+```json
+{
+  "scripts": {
+    "lint:format": "prettier  --write --cache \"src/**/*.{js,ts,json,tsx,css,less,scss,vue,html,md}\"",
+  }
+}
+
+--write：这将就地重写所有已处理的文件。这与  eslint --fix  工作流程相当。您也可以使用  -w  别名。
+--cache： 存储有关已处理文件的信息，以便仅对更改的文件进行操作
+
+// 在终端来格式化代码
+pnpm lint:format
+
+
+```
+
+**ESLint 和 Prettier 配合使用**、在 ESLint v9.0.0 前的格式化程序和 Prettier 起冲突，这里介绍两个依赖：
+1. eslint-config-prettier：关闭所有不必要或可能与 Prettier 冲突的规则、在 ESLint v9 已经移除了多个内置的格式化规则，使其更专注于代码质量检查而非格式化。所有它的用武之地有所减少、但是一些广泛使用的 ESLint 插件可能仍然包含格式化相关的规则。如果是v9.0.0及以下版本，也还是需要使用。
+2. eslint-plugin-prettier：将 Prettier 作为规则插入到 ESLint 里
+   
+对于那些还没移除的规则可以手动关闭或者继续使用 eslint-config-prettier 插件。这里我们只使用第二个。安装
+```bash
+pnpm add --save-dev eslint-plugin-prettier
+devDependencies:
++ eslint-plugin-prettier 5.2.3
+
+
+```
+
+**配置**
+```js
+// eslint.config.js 
+//...其他依赖
+import pluginPrettier from "eslint-plugin-prettier";
+
+/** @type {import('eslint').Linter.Config[]} */
+export default [
+  //...
+  {
+    plugins: {
+      prettier: pluginPrettier,
+    },
+    rules: {
+      "prettier/prettier": "error",
+    },
+  },
+];
+
+```
+
+
+
+
 

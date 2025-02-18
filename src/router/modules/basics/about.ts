@@ -12,4 +12,3 @@ const About: RouteRecordRaw = {
 };
 
 export default About;
-

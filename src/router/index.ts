@@ -7,7 +7,7 @@ const routes: RouteRecordRaw[] = [];
 const basicRoutes: Record<string, any> = import.meta.glob(['./modules/basics/**/*.ts'], {
   eager: true,
 });
-console.log("basicRoutes",basicRoutes);
+console.log('basicRoutes', basicRoutes);
 
 // 遍历路由配置项，将路由添加到 routes 数组中
 for (const key in basicRoutes) {

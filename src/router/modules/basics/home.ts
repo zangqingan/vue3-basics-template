@@ -13,4 +13,3 @@ const Home: RouteRecordRaw = {
 };
 
 export default Home;
-
