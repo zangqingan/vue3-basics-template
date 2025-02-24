@@ -948,7 +948,145 @@ export default [
 
 ```
 
+## 5.3 Stylelint
+一个强大的 CSS 检测工具，可帮助您避免错误并执行约定。Stylelint 和 ESLint 很类似，都是定义规则、风格来进行代码检查，保证代码风格一致性，并发现一些潜在错误或不规范的代码。不同在于 Stylelint 针对的是 CSS 样式的代码检查。[官网](https://stylelint.io/)
+**安装**
+```js
+pnpm add stylelint --save-dev
+devDependencies:
++ stylelint 16.14.1
+
+```
+
+同时在 VS Code 扩展模块搜索 Stylelint 进行安装，并在 settings.json 文件中写入以下配置。
+```json
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit",
+      "source.fixAll.stylelint": "explicit",//配置 stylelint 保存自动修复
+    },
+    "stylelint.validate": ["css", "less", "scss", "sass", "postcss", "vue"]//插件检查范围
+
+
+```
+
+Stylelint 配置文件,在根目录下新建一个 stylelint.config.js 文件，同时确保你的 package.json 配置了 "type": "module"，表示使用 ESM 模块导出。同时在根目录下新建一个 .stylelintignore 文件用来忽略大量文件。Stylelint 配置项和eslint是类似的。
+
+```js
+// stylelint.config.js
+/** @type {import('stylelint').Config} */
+export default {
+  // 扩展现有配置
+  extends: [
+    "stylelint-config-standard",
+    "stylelint-config-recess-order",
+    "stylelint-config-html",
+  ],
+  // 自定义规则
+  rules: {
+    'block-no-empty': true, //禁止空块，比如 a{ }
+  },
+  // overrides 指定应用的文件
+  overrides: [
+    {
+      files: ["*.less", "**/*.less"],
+      customSyntax: "postcss-less",
+	    extends: ['stylelint-config-standard', 'stylelint-config-recommended-vue']
+    },
+    {
+      files: ["*.scss", "**/*.scss"],
+      customSyntax: "postcss-scss",
+      extends: ["stylelint-config-standard-scss", "stylelint-config-recommended-vue/scss"],
+    },
+  ]
+
+};
+
+// .stylelintignore
+node_modules
+dist
+public
+src/assets/*
+
+// 对css文件校验-一般回集成命令到scripts脚本中。
+npx stylelint "**/*.scss"
+
+```
+
+到这里css的检查设置其实已经完成、但是一般会使用社区已经发布的校验包喝自定义校验规则这时就需要如下依赖。
+
+```js
+pnpm add stylelint-config-standard stylelint-config-standard-scss --save-dev
+devDependencies:
++ stylelint-config-standard 37.0.0
++ stylelint-config-standard-scss 14.0.0
+
+pnpm add stylelint-config-recommended-vue stylelint-config-recess-order stylelint-config-html --save-dev
+devDependencies:
++ stylelint-config-html 1.1.0
++ stylelint-config-recess-order 6.0.0
++ stylelint-config-recommended-vue 1.6.0
+
+pnpm add postcss postcss-html postcss-scss --save-dev
+# Less用 postcss-less，scss用 postcss-scss 
+devDependencies:
++ postcss 8.5.3
++ postcss-html 1.8.0
++ postcss-scss 4.0.9
 
 
 
+```
+1. stylelint-config-standard：Stylelint 的 CSS 标准配置
+2. stylelint-config-standard-scss：Stylelint 的标准可共享 SCSS 配置。
+3. Scss：stylelint-config-recommended-scss：Stylelint 推荐的可共享 SCSS 配置
+4. stylelint-config-recommended-vue：扩展 stylelint-config-recommended 配置，并提供推荐的 Vue 相关规则
+5. stylelint-config-recess-order：对 CSS 属性进行排序
+6. stylelint-config-html：此配置捆绑  postcss-html  自定义语法并对其进行配置
+7. postcss：使用 JavaScript 转换 CSS 的工具
+8. postcss-html: 用于解析 HTML（和类 HTML）的 PostCSS 语法，比如 Vue SFC 文件
+9. Less：postcss-less：用于解析 Less 的 PostCSS 语法
+10. Scss：postcss-scss： 用于解析 Scss 的 PostCSS 语法
 
+上面的依赖中，除了可选的 Less 和 Scss 外，其余依赖建议全部安装(默认你使用 Vue 框架)，因为它们提供了一些有用的规则和配置。
+ 
+**与 Prettier 配合**、在 Stylelint 中和 Prettier 类似也有两个包用来解决和Prettier的冲突问题。我们这个只安装后一个。注意，请确保你已经安装了 Stylelint 和 Prettier
+
+```js
+pnpm add stylelint-prettier --save-dev
+devDependencies:
++ stylelint-prettier 5.0.3
+
+```
+1. stylelint-config-prettier，用于解决 Stylelint 和 Prettier 之间的规则冲突问题、现在已经不维护了，因为从 Stylelint v15 开始，所有与样式相关的格式规则都已被弃用，比如那些强制执行特定代码风格或格式的规则。所以要根据版本来确实是否需要。
+2. stylelint-prettier，作为 Stylelint 规则运行 Prettier，并将差异报告为单独的 Stylelint 问题
+
+然后在 stylelint.config.js 中配置
+
+```js
+/** @type {import('stylelint').Config} */
+
+export default {
+  plugins: ["stylelint-prettier"],
+  rules: {
+    "prettier/prettier": true,
+  },
+};
+
+
+```
+最后stylelint 脚本命令配置
+
+```json
+{
+  "scripts": {
+    "lint:style": "stylelint --fix --max-warnings 0 --cache \"**/*.{css,scss,sass,vue}\" --cache-location \"ode_modules/.cache/stylelint/\""
+  }
+}
+--fix：自动修复规则报告的问题
+--max-warnings：设置接受的警告数量限制
+--cache：存储已处理文件的结果，以便 Stylelint 仅对更改的文件进行操作
+--cache-location：作用同 ESLint，将缓存文件放在 node_modules/.cache 下
+
+pnpm lint:style
+
+```
