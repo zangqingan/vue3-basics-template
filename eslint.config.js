@@ -40,6 +40,8 @@ export default [
       ...pluginVue.configs['vue3-recommended'].rules,
       // ...更多配置规则
       'vue/max-attributes-per-line': ['off'],
+      'vue/multi-word-component-names': 'off',
+      'vue/singleline-html-element-content-newline': 'off',
     },
   },
   // TypeScript 配置
@@ -263,15 +265,13 @@ export default [
       'vars-on-top': 'error',
       yoda: ['error', 'never'],
       'spaced-comment': 'error',
+      'prettier/prettier': 'error',
     },
   },
   // prettier 作为eslint规则
   {
     plugins: {
       prettier: pluginPrettier,
-    },
-    rules: {
-      'prettier/prettier': 'error',
     },
   },
   // 忽略检查文件

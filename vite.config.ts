@@ -33,6 +33,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
     resolve: {
       alias: {
         '@': resolve(__dirname, 'src'),
+        '#': resolve(__dirname, 'src/types'),
       },
     },
     // css配置
