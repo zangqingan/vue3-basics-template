@@ -1,7 +1,7 @@
 /** @type {import('stylelint').Config} */
 export default {
-  plugins: ['stylelint-prettier'],
   extends: ['stylelint-config-standard', 'stylelint-config-recess-order', 'stylelint-config-html'], // 扩展现有配置
+  plugins: ['stylelint-prettier'],
   rules: {
     'prettier/prettier': true, // 作为 Stylelint 规则运行 Prettier
     'block-no-empty': true, //禁止空块，比如 a{ }

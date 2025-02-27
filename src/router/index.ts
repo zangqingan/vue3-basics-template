@@ -2,9 +2,14 @@ import type { RouteRecordRaw } from 'vue-router';
 
 const routes: RouteRecordRaw[] = [];
 
+// 定义路由模块的类型
+interface RouteModule {
+  default: RouteRecordRaw;
+}
+
 // 获取 modules 目录下所有的路由配置项
 /** 基础路由 */
-const basicRoutes: Record<string, any> = import.meta.glob(['./modules/basics/**/*.ts'], {
+const basicRoutes: Record<string, RouteModule> = import.meta.glob(['./modules/basics/**/*.ts'], {
   eager: true,
 });
 console.log('basicRoutes', basicRoutes);

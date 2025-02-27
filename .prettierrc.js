@@ -1,6 +1,6 @@
 /** @type {import('prettier').Config} */
 const config = {
-  printWidth: 100, // 每行最大字符数
+  printWidth: 120, // 每行最大字符数
   tabWidth: 2, // 缩进空格数
   semi: true, // 尾部添加分号
   singleQuote: true, // 是否使用单引号而不是双引号
@@ -11,4 +11,3 @@ const config = {
 };
 
 export default config;
-

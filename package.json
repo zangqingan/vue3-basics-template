@@ -11,7 +11,9 @@
     "preview": "vite preview",
     "lint:eslint": "eslint --fix  --cache --max-warnings 0  \"src/**/*.{vue,ts,tsx}\"  --cache-location \"node_modules/.cache/eslint/\"",
     "lint:format": "prettier  --write --cache \"src/**/*.{js,ts,json,tsx,css,less,scss,vue,html,md}\"",
-    "lint:style": "stylelint --fix --max-warnings 0 --cache \"**/*.{css,scss,sass,vue}\" --cache-location \"node_modules/.cache/stylelint/\""
+    "lint:style": "stylelint --fix --max-warnings 0 --cache \"**/*.{css,scss,sass,vue}\" --cache-location \"node_modules/.cache/stylelint/\"",
+    "lint": "pnpm lint:format && pnpm lint:eslint && pnpm lint:style",
+    "clear:cache": "rimraf node_modules/.cache"
   },
   "dependencies": {
     "@vueuse/core": "^12.5.0",
@@ -34,6 +36,7 @@
     "postcss-html": "^1.8.0",
     "postcss-scss": "^4.0.9",
     "prettier": "3.5.1",
+    "rimraf": "^6.0.1",
     "rollup-plugin-visualizer": "^5.14.0",
     "sass": "^1.84.0",
     "stylelint": "^16.14.1",

@@ -6,7 +6,7 @@ const About: RouteRecordRaw = {
     {
       path: '/about',
       name: 'About',
-      component: () => import('../../../views/about/index.vue'),
+      component: () => import('@/views/about/aboutIndex.vue'),
     },
   ],
 };

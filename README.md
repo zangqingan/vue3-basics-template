@@ -1090,3 +1090,56 @@ export default {
 pnpm lint:style
 
 ```
+
+
+## 5.4 其它
+EditorConfig 帮助我们在不同 IDE 编辑器中维持一致的编码风格和格式化规范，比如缩进，字符编码等。VS Code 本身不支持 EditorConfig，我们通过插件来使用。插件会在根目录下找到配置文件，读取 .editorconfig 文件中定义的规则，并覆盖工作区的对应配置。
+
+**脚本命令聚合**
+上面我们配置了 ESLint、Prettier、Stylelint的脚本命令，我们可以写一个聚合的命令，统一执行我们的三条脚本。注意这里的顺序，我们应该先格式化代码后再调用 ESLint，Stylelint 进行代码检查
+
+```json
+{
+  "scripts": {
+    "lint": "pnpm lint:format && pnpm lint:eslint && pnpm lint:style",
+  }
+}
+
+
+```
+
+**缓存文件删除**
+在上面的 Eslint 和 Stylelint 命令中，会生成缓存文件，这些文件存在 node_modules/.cache 目录中，有些时候我们可以删除这些缓存，它的作用在于删除缓存会强制重新检查所有文件，而不是依赖可能过时的缓存结果。这里通过rimraf 是一个跨平台的删除工具，我们借助它来删除缓存文件
+```js
+pnpm add -D rimraf
+devDependencies:
++ rimraf 6.0.1
+
+// 在 package.json 的 scripts 中写入删除缓存文件脚本
+  "scripts": {
+    "clear:cache": "rimraf node_modules/.cache",
+  }
+
+// 然后就可以在终端执行命令来删除 node_modules/.cache 文件
+pnpm clear:cache
+
+```
+
+**文件折叠**
+ESLint、Stylelint、Prettier都有其配置文件及忽略文件等，可以在 VS Code 中写入配置来折叠它们，显得整洁
+```json
+{
+  "explorer.fileNesting.enabled": true, //是否启用文件折叠
+  "explorer.fileNesting.expand": false, //控制是否自动扩展文件嵌套
+  "explorer.fileNesting.patterns": {
+    "*.env": ".env.*",
+    "eslint.config.js": ".prettierrc.*, stylelint.*, .editorconfig, .prettierignore, .stylelintignore",
+    "package.json": "package-lock.json",
+  },
+  "files.autoSave": "onFocusChange",
+  "compile-hero.disable-compile-files-on-did-save-code": true
+}
+
+
+```
+
