@@ -7,7 +7,7 @@ const Home: RouteRecordRaw = {
     {
       path: '/home',
       name: 'Home',
-      component: () => import('@/views/home/homeIndex.vue'),
+      component: () => import('@/views/home/index.vue'),
     },
   ],
 };

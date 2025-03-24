@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useUserStore } from '@/store';
-const userStore = useUserStore();
-const { increment } = userStore;
+  import { useUserStore } from '@/store';
+  const userStore = useUserStore();
+  const { increment } = userStore;
 </script>
 
 <template>
