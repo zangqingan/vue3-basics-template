@@ -49,7 +49,7 @@ node下载:[官网](https://nodejs.org/en/download)
 
 # 二、技术栈
 vue3全家桶、而且是和ui框架无关的。我们只安装一下常用的。
-Vue 3、Vite、TypeScript、Pinia、Vue Router、axios、sass、VueUse
+Vue3、Vite、TypeScript、Pinia、VueRouter、axios、sass、VueUse
 
 **安装**
 ```bash
@@ -95,10 +95,11 @@ pnpm add sass -D
 目录结构设计及命名比如:
 1. components 代表全局公共组件目录
 2. views 代表页面目录
-3. store 代表状态管理目录
-4. hooks 代表自定义 hook
-5. utils 代表工具方法目录
-6. types 代表 ts 类型定义目录
+3. router 代表路由目录
+4. store 代表状态管理目录
+5. hooks 代表自定义 hook
+6. utils 代表工具方法目录
+7. types 代表 ts 类型定义目录
 
 
 # 三、Pinia 和 Vue Router 配置 
@@ -143,6 +144,20 @@ export {
 }
 
 // main.ts 中运行
+import '@/assets/styles/index.scss';
+import { createApp } from 'vue';
+import { initStore } from './store/init.ts';
+import App from './App.vue';
+
+/**
+ * 定义一个函数用来启动Vue
+ */
+async function bootstrap() {
+  const app = createApp(App);
+  initStore(app);
+  app.mount('#app');
+}
+bootstrap();
 
 ```
 
@@ -184,16 +199,21 @@ export {
 }
 
 // index.ts
-// import type { RouteRecordRaw } from 'vue-router';
+import type { RouteRecordRaw } from 'vue-router';
 
 const routes: RouteRecordRaw[] = [];
 
+// 定义路由模块的类型
+interface RouteModule {
+  default: RouteRecordRaw;
+}
+
 // 获取 modules 目录下所有的路由配置项
 /** 基础路由 */
-const basicRoutes: Record<string, any> = import.meta.glob(['./modules/basics/**/*.ts'], {
+const basicRoutes: Record<string, RouteModule> = import.meta.glob(['./modules/basics/**/*.ts'], {
   eager: true,
 });
-console.log("basicRoutes",basicRoutes);
+console.log('basicRoutes', basicRoutes);
 
 // 遍历路由配置项，将路由添加到 routes 数组中
 for (const key in basicRoutes) {
@@ -205,6 +225,7 @@ for (const key in basicRoutes) {
 // });
 // 导出
 export { routes };
+
 
 // modules/basics/home.ts
 import type { RouteRecordRaw } from 'vue-router';
@@ -258,7 +279,6 @@ const { increment } = userStore;
 // main.ts 配置初始化
 import './style.css'
 import { createApp } from 'vue'
-import { initStore } from './store/init'
 import { initRouter } from './router/init'
 import App from './App.vue'
 
@@ -267,7 +287,6 @@ import App from './App.vue'
  */
 async function bootstrap() {
     const app = createApp(App)
-    initStore(app)
     initRouter(app)
     app.mount('#app')
     
@@ -279,7 +298,7 @@ bootstrap()
 
 
 # 四、Vite 配置
-ite 是一种新型前端构建工具，能够显著提升前端开发体验，它主要由两部分组成：
+Vite 是一种新型前端构建工具，能够显著提升前端开发体验，它主要由两部分组成：
 
 1. 一个开发服务器，它基于 原生 ES 模块 提供了 丰富的内建功能，如速度快到惊人的 模块热替换（HMR）。
 2. 一套构建指令，它使用 Rollup 打包你的代码，并且它是预配置的，可输出用于生产环境的高度优化过的静态资源。
@@ -412,34 +431,6 @@ export default defineConfig({
     }
   }
 })
-
-```
-
-3. 打包分析可视化、安装 rollup-plugin-visualizer 包。[官网](https://github.com/vbenjs/vite-plugin-compression)
-   
-**安装**
-```bash
-pnpm add rollup-plugin-visualizer -D
-
-```
-
-
-**配置**
-```js
-
-```
-
-4. 打包分析可视化、安装 rollup-plugin-visualizer 包。[官网](https://github.com/vbenjs/vite-plugin-compression)
-   
-**安装**
-```bash
-pnpm add rollup-plugin-visualizer -D
-
-```
-
-
-**配置**
-```js
 
 ```
 
@@ -614,27 +605,19 @@ export default ({ mode }: ConfigEnv): UserConfig => {
 
 **实现**、它是在 build.rollupOptions  构建选项中自定义底层的 Rollup 打包配置。
 ```js
-
+  // 打包分包配置
+    build: {
+      chunkSizeWarningLimit: 1500, // 超出 chunk 大小警告阈值，默认500kb
+      // Rollup 打包配置
+      rollupOptions: {
+        output: {
+          entryFileNames: 'assets/js/[name]-[hash:8].js', // 入口文件名称
+          chunkFileNames: 'assets/js/[name]-[hash:8].js', // 引入文件名名称
+          assetFileNames: 'assets/[ext]/[name]-[hash:8][extname]', // 静态资源名称
+        },
+      },
+    },
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 # 五、代码规范配置
@@ -1143,3 +1126,4 @@ ESLint、Stylelint、Prettier都有其配置文件及忽略文件等，可以在
 
 ```
 
+# 六、Git 提交规范化

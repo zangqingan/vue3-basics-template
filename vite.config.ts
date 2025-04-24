@@ -44,7 +44,7 @@ export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
         },
       },
     },
-    // 打包配置
+    // 打包配置-生产环境去除 console.log、debugger
     esbuild: {
       drop: ['debugger'],
       pure: ['console.log'],
