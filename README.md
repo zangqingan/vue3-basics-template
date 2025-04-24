@@ -1207,4 +1207,259 @@ echo "npm test" > .husky/pre-commit
 echo "pnpm lint-staged" > .husky/pre-commit
 
 ```
-之后把修改了的文件加入到缓存区，就可以使用git commit -m "提交测试"，测试是否配置成功。
+之后把修改了的文件加入到缓存区，就可以使用git commit -m "提交测试"，测试是否配置成功。如果校验未通过，Commit 提交并未通过而是直接退出了。校验通过就提交了。
+
+## 6.4 commit 规范
+通过上面的设置我们已经实现了git提交时的lint检查，接下来是实现的提交信息的统一配置。不配置时我们都是通过git commit -m "提交信息"，这样的提交信息是不规范的。commit 规范的意义体现在几个方面：
+1. 提高代码可读性和项目质量、改善项目可维护性
+2. 简化协作和沟通
+3. 方便版本管理和代码回溯
+4. 有助于自动化生成变更日志
+
+这里介绍两个commit提交规范
+1. Angular 规范，由 Angular 团队制定并使用，也被社区广泛接受。
+2. Conventional Commits 规范则是由 Angular 规范发展调整而来的一个更通用的规范，官网的介绍是：约定式提交，一种用于给提交信息增加人机可读含义的规范，提供一套规则来创建清晰的提交历史：
+
+要让我们的提交信息能够符合 Conventional Commits 规范，可通过使用工具如 commitlint 来实现。
+
+
+
+## 6.5 commitlint
+Commitlint 是一个用于校验 Commit Message 的工具，它可以帮助我们在提交代码前检查 Commit Message 是否符合规范。
+**安装**
+```js
+pnpm add --save-dev @commitlint/{cli,config-conventional}
+devDependencies:
++ @commitlint/cli 19.8.0
++ @commitlint/config-conventional 19.8.0
+
+
+```
+
+1. @commitlint/cli，命令行工具.
+2. @commitlint/config-conventional，此配置遵循 Conventional Commits 规范，与 @commitlint/cli 配合使用，
+
+**配置**
+1. 根目录下新建 commitlint.config.js 文件，导出一个对象，里面配置 Conventional Commits 规范
+```js
+/** @type {import('@commitlint/types').UserConfig} */ 
+ export default { extends: ['@commitlint/config-conventional'] };
+```
+一个基本的提交约定遵循以下模式：
+type(scope?): subject
+body?
+footer?
+
+
+写完自定义的配置规则后，我们要在创建提交之前对其进行 lint 校验，需要使用到 Husky 的 commit-msg 钩子，commit-msg 概念：存有当前提交信息的临时文件，如果该钩子脚本以非零值退出，Git 将放弃提交。
+运行 shell 命令`echo "pnpm dlx commitlint --edit \$1" > .husky/commit-msg`，将其写入.husky/commit-msg文件中。到这一步，我们已经实现了基本的 commit 信息校验。可以提交当前commit，查看lint 校验是否起作用。
+```js
+Progress: resolved 100, reused 79, downloaded 21, added 100, done
+⧗   input: 测试
+✖   subject may not be empty [subject-empty]
+✖   type may not be empty [type-empty]
+
+✖   found 2 problems, 0 warnings
+ⓘ   Get help: https://github.com/conventional-changelog/commitlint/#what-is-commitlint
+
+husky - commit-msg script failed (code 1)
+```
+可以看到，提交信息不符合规范，所以提交失败了。解决方法也很简单，修改 commit 信息使其符合规则即可。但是不友好，新人也不知道有哪些类型，所以最好是通过自动化程序来避免这种纯手敲 commit 信息格式的错误，也就是说通过工具来给我们提供交互式命令行界面，创建符合 Commitlint 规范的 Commit 信息。社区有这样的解决方案，通过 Commitizen 来辅助我们生成一套标准化规范化的 Commit 信息
+
+## 6.6 Commitizen
+Commitizen 是一个基于 Node.js 的 git commit 命令行工具，它可以帮助我们生成符合规范的 Commit 信息。
+类似的工具有两个
+1. @commitlint/prompt-cli 是官方提供的包，是 Commitlint 生态一部分，与 Commitlint 无缝衔接
+2. Commitizen 拥有着更大的社区、更广泛的使用、更成熟，灵活及定制化
+我们使用 Commitizen。
+**安装**
+```js
+pnpm add --save-dev commitizen
+devDependencies:
++ commitizen 4.3.1
+
+```
+安装完后，我们还需要安装一个适配器，这里介绍两个：
+1. cz-conventional-changelog是 Commitizen 文档中介绍的适配器，也是广泛使用的适配器
+2. @commitlint/cz-commitlint 是 Commitlint 官方提供的 Commitizen 适配器，提供了一种更现代的交互方式
+这里使用 @commitlint/cz-commitlint 适配器
+```js
+pnpm add --save-dev @commitlint/cz-commitlint
+
+devDependencies:
++ @commitlint/cz-commitlint 19.8.0
+
+```
+
+
+接着在 package.json 中写入以下内容：
+```json
+{
+  "scripts": {
+    "commit": "git-cz"
+  },
+  "config": {
+    "commitizen": {
+      "path": "@commitlint/cz-commitlint"
+    }
+  },
+}
+
+```
+这样就可以通过命令 `git cz` 来启动交互式命令行界面，输入符合规范的 Commit 信息。
+
+**配置**
+在做完上述的安装及基础配置后，我们可以自定义自己的交互文本，在 commitlint.config.js 文件中配置 prompt 属性。最终文件内容如下：
+```js
+export default {
+  ignores: [(commit) => commit === ''],
+  extends: ['@commitlint/config-conventional'],
+  rules: {
+    'type-enum': [
+      2,
+      'always',
+      [
+        'feat', // 新功能 | New feature
+        'fix', // 修复bug | Bug fix
+        'docs', // 文档更新 | Documentation updates
+        'style', // 代码格式（不影响代码运行的变动） | Code formatting (changes that do not affect code execution)
+        'refactor', // 重构（既不是新增功能，也不是修改bug的代码变动） | Refactoring (code changes that neither fix a bug nor add a feature)
+        'perf', // 性能优化 | Performance improvements
+        'test', // 增加测试 | Adding tests
+        'chore', // 构建过程或辅助工具的变动等杂事、琐事 | Changes to the build process or auxiliary tools
+        'revert', // 回滚到上一个版本 | Revert to a previous version
+        'build', // 编译相关的修改，例如发布版本、对项目构建或者依赖的改动 | Compilation-related changes, such as release versions or changes to project build or dependencies
+        'types', // 类型 | Types
+        'ci', // CI 配置文件和脚本的更改 | Changes to CI configuration files and scripts
+      ],
+    ],
+    'header-max-length': [2, 'always', 100], // 头部最大长度100
+    'body-max-line-length': [2, 'always', 100], // body最大长度100
+    'footer-max-line-length': [2, 'always', 100], // footer最大长度100
+    'type-empty': [2, 'never'], // type 不能为空
+    'subject-empty': [2, 'never'], // subject 不能为空
+    // "scope-empty": [2, "never"], // scope 不能为空
+    'type-case': [2, 'always', 'lower-case'], // type 小写
+    'scope-case': [2, 'always', ['lower-case', 'pascal-case']], // scope - lower case、PascalCase
+    'subject-case': [0, 'always'], // subject 不显示大小写
+  },
+  // 选项对话
+  prompt: {
+    questions: {
+      type: {
+        description: "选择你要提交的变更类型 | Select the type of change you're committing",
+        enum: {
+          feat: {
+            description: '新功能 | A new feature',
+            title: 'Features | 功能',
+            emoji: '✨',
+          },
+          fix: {
+            description: '修复bug | A bug fix',
+            title: 'Bug Fixes | 修复',
+            emoji: '🐛',
+          },
+          docs: {
+            description: '仅文档更改 | Documentation only changes',
+            title: 'Documentation | 文档',
+            emoji: '📚',
+          },
+          style: {
+            description:
+              '不影响代码含义的更改（空白、格式化、缺少分号等）| Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc)',
+            title: 'Styles | 样式',
+            emoji: '💎',
+          },
+          refactor: {
+            description:
+              '既不修复bug也不添加新功能的代码更改 | A code change that neither fixes a bug nor adds a feature',
+            title: 'Code Refactoring | 代码重构',
+            emoji: '📦',
+          },
+          perf: {
+            description: '提高性能的代码更改 | A code change that improves performance',
+            title: 'Performance Improvements | 性能优化',
+            emoji: '🚀',
+          },
+          test: {
+            description: '添加缺失的测试或修正现有的测试 | Adding missing tests or correcting existing tests',
+            title: 'Tests | 测试',
+            emoji: '🚨',
+          },
+          chore: {
+            description: '构建过程或辅助工具的变动等杂事、琐事 | Changes to the build process or auxiliary tools',
+            title: 'Chores | 杂务',
+            emoji: '🔧',
+          },
+          revert: {
+            description: '回滚到上一个版本 | Revert to a previous version',
+            title: 'Reverts | 回滚',
+            emoji: '⏪',
+          },
+          build: {
+            description:
+              '编译相关的修改，例如发布版本、对项目构建或者依赖的改动 | Changes that affect the build system or external dependencies',
+            title: 'Builds | 构建',
+            emoji: '🏗',
+          },
+          types: {
+            description: '类型定义文件更改 | Changes to type definitions',
+            title: 'Types | 类型',
+            emoji: '🏷️',
+          },
+          ci: {
+            description: 'CI 配置文件和脚本的更改 | Changes to CI configuration files and scripts',
+            title: 'Continuous Integration | 持续集成',
+            emoji: '🎡',
+          },
+        },
+      },
+      scope: {
+        description:
+          '变更的范围是什么（例如组件或文件名，可选）| What is the scope of this change (e.g. component or file name，optional)',
+      },
+      subject: {
+        description:
+          '写一个简短的、命令式的变更描述（必填） | Write a short, imperative tense description of the change（required）',
+      },
+      body: {
+        description: '提供更长的变更描述（可选） | Provide a longer description of the change（optional）',
+      },
+      isBreaking: {
+        description: '有什么重大变更吗？| Are there any breaking changes?',
+      },
+      breakingBody: {
+        description:
+          '重大变更提交需要一个正文。请输入提交本身的更长描述 | A BREAKING CHANGE commit requires a body. Please enter a longer description of the commit itself',
+      },
+      breaking: {
+        description: '描述重大变更 | Describe the breaking changes',
+      },
+      isIssueAffected: {
+        description: '此变更是否影响任何未解决的问题？| Does this change affect any open issues?',
+      },
+      issuesBody: {
+        description:
+          '如果问题已关闭，提交需要一个正文。请输入提交本身的更长描述 | If issues are closed, the commit requires a body. Please enter a longer description of the commit itself',
+      },
+      issues: {
+        description: '添加问题引用（例如 "fix #123", "re #123"）| Add issue references (e.g. "fix #123", "re #123".)',
+      },
+    },
+  },
+};
+
+```
+
+至此提交信息格式化完成。测试一下`pnpm commit` 提交、出现交互式命令界面即为成功。
+
+
+
+
+
+
+
+
+
+
+

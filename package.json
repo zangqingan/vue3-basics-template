@@ -14,7 +14,13 @@
     "lint:style": "stylelint --fix --max-warnings 0 --cache \"**/*.{css,scss,sass,vue}\" --cache-location \"node_modules/.cache/stylelint/\"",
     "lint": "pnpm lint:format && pnpm lint:eslint && pnpm lint:style",
     "clear:cache": "rimraf node_modules/.cache",
-    "prepare": "husky"
+    "prepare": "husky",
+    "commit": "git-cz"
+  },
+  "config": {
+    "commitizen": {
+      "path": "@commitlint/cz-commitlint"
+    }
   },
   "dependencies": {
     "@vueuse/core": "^12.5.0",
@@ -25,10 +31,14 @@
     "vue-router": "4"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.8.0",
+    "@commitlint/config-conventional": "^19.8.0",
+    "@commitlint/cz-commitlint": "^19.8.0",
     "@eslint/js": "^9.20.0",
     "@types/node": "^22.13.1",
     "@vitejs/plugin-vue": "^5.2.1",
     "@vue/tsconfig": "^0.7.0",
+    "commitizen": "^4.3.1",
     "eslint": "^9.20.1",
     "eslint-plugin-prettier": "^5.2.3",
     "eslint-plugin-vue": "^9.32.0",
