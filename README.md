@@ -1127,3 +1127,84 @@ ESLint、Stylelint、Prettier都有其配置文件及忽略文件等，可以在
 ```
 
 # 六、Git 提交规范化
+在团队合作中，Git 提交如果没有规范化，会让代码库变得混乱不堪，影响协作效率，特别是在多人协作中。如何从零开始搭建一套高效的 Git 提交规范化流程，是每个团队都需要思考的问题。这一节聚焦在工程层面，致力于从零搭建起一套 Git 提交规范化流程，通过工具如 Husky、Lint-staged、Commitlint 和 Commitizen，一步步实现 Git 提交规范化，主要分为 lint 校验和 Commit Message 规范化。简单理解就是git在提交时提供了各个阶段的钩子，由此用户可以定制提交的行为。
+
+1. husky：一个 Git hook 工具，使用 Husky 可以挂载 Git 钩子，使现代的原生 Git 钩子变得简单，即可以帮助我们在 commit 前做一些自定义操作
+2. Lint-staged： 对暂存的 git 文件运行 linters，也就是只对暂存的文件进行 ESLint、Prettier、Stylelint 等检查
+3. commitlint：对 commit 信息进行检查，即 lint Commit Message
+4. Commitizen：基于 Node.js 的  git commit  命令行工具，辅助生成标准化规范化的 Commit Message
+
+
+
+## 6.1 git-hook
+hook 翻译过来是钩子的意思，有点类似于 Vue 的生命周期钩子一样，Git 同样能在特定的重要动作发生时触发自定义脚本。执行 git init 命令后，会在当前目录下生成一个 .git 的隐藏文件，目录中就存在一个 hooks 文件夹，它里面存放着一些 shell 脚本(以 .sample 为后缀，表示默认不启动)。主要分为两大类：客户端和服务端，我们这里只关注客户端。在客户端下，也细分一些钩子种类，比如 提交工作流钩子、电子邮件工作流钩子和其它钩子等。常用如下：
+1. pre-commit  钩子在键入提交信息前运行，所以可以在这里进行 lint 校验，比如 ESLint、Stylelint、Prettier 等。
+2. commit-msg  存有当前提交信息的临时文件，如果该钩子脚本以非零值退出，Git 将放弃提交。对当前 Commit Message 进行检查并使用工具来规范化 Message 信息。
+
+而为了实现在 git 钩子里去做这些事情，我们就需要借助工具 Husky 来配置 Git 钩子。
+
+## 6.2 husky
+Husky 是一个 Git hooks 工具，使用 Husky 可以挂载 Git 钩子，使现代的原生 Git 钩子变得简单，即它可以帮助我们在 Git 操作执行前或执行后自动执行脚本，从而实现 Git 提交的自动化。
+
+**安装**
+```js
+pnpm add husky --save-dev
+devDependencies:
++ husky 9.0.10
+
+// init 初始化
+pnpm exec husky init
+  "scripts": {
+    "prepare": "husky"
+  },
+```
+`pnpm exec husky init`：这条命令会在根目录下新增一个 .husky 目录，目录下会创建  pre-commit  脚本并在  package.json  中生成一个名为 prepare 的脚本。现在就可以在 pre-commit 里键入提交信息前进行 lint 校验。
+
+到这里我们要思考一个问题: 因为lint一般都是全局可能会耗费大量时间，那么有没有一个方案，只 lint 我当前修改的文件，而不是全量 lint ，这样就可以避免 lint 的耗时，提高效率且有针对性。也就是只对在暂存区的的文件进行 lint 校验，这就需要借助 lint-staged 来实现。Lint-staged 就是用来解决这样的问题的，帮助我们在暂存的文件上执行 lint，而不是对整个项目进行全量校验。这样可以显著减少 lint 校验的时间消耗，提高效率，并确保校验的针对性。
+
+## 6.3 lint-staged
+**安装**
+```js
+pnpm add lint-staged --save-dev
+devDependencies:
++ lint-staged 15.2.11 
+
+```
+**配置**
+lint-staged 安装完成后，我们需要来配置一下它，这个做法和 ESLint、Stylelint 等很像.可以通过多种方式来配置，一种普遍的方式是直接在 package.json 中配置，比如
+```json
+  "lint-staged": {
+    "*.{js,ts,jsx,tsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.vue": [
+      "prettier --write",
+	  "eslint --fix",
+      "stylelint --fix",
+    ]
+  },
+
+```
+还有种方式是在根目录下创建一个配置文件:lint-staged.config.js 这个文件默认导出一个对象(lint-staged 会自动找到这个配置文件)
+
+```js
+/** @type {import("lint-staged").Config} */
+export default {
+  "*.vue": ["prettier --write --cache", "eslint --fix", "stylelint --fix"],
+  "*.{js,ts,jsx,tsx}": ["prettier --write --cache", "eslint --fix"],
+  "*.{css,scss,less}": ["prettier --write --cache", "stylelint --fix"],
+  "*.html": ["prettier --write --cache", "stylelint --fix"],
+  "*.json": "prettier --write --cache",
+};
+
+```
+
+接下来，我们需要确保 Git 钩子 pre-commit 能够正确调用 lint-staged。添加钩子是很简单的。
+在根目录下的终端运行 shell 命令. echo后面是命令，表示把这个内容写入.husky目录下的pre-commit文件中。
+```bash
+echo "npm test" > .husky/pre-commit
+echo "pnpm lint-staged" > .husky/pre-commit
+
+```
+之后把修改了的文件加入到缓存区，就可以使用git commit -m "提交测试"，测试是否配置成功。
